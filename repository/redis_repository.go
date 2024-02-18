@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 	"math/rand"
@@ -16,12 +15,15 @@ import (
 )
 
 var (
-	NotFound         = fmt.Errorf("not found")
-	ErrLimitExceeded = errors.New("limit exceeded")
+	NotFound = fmt.Errorf("not found")
 )
 
 type redisRepository struct {
 	redisClient *redis.Client
+}
+
+func (r *redisRepository) ShutDown() {
+	r.redisClient.Close()
 }
 
 func (r *redisRepository) GetLimitAndBalance(ctx context.Context, id string) (int, int, error) {
@@ -56,7 +58,7 @@ func (r *redisRepository) GetLimitAndBalance(ctx context.Context, id string) (in
 	return limit, balance, nil
 }
 
-func (r *redisRepository) SaveTransaction(ctx context.Context, id string, t model.Transaction) (int, int, error) {
+func (r *redisRepository) SaveTransaction(ctx context.Context, id string, t *model.Transaction) (int, int, error) {
 	var (
 		err   error
 		limit int

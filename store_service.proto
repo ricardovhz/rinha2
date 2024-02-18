@@ -10,11 +10,6 @@ message Transaction {
     int32 value = 5;
 }
 
-message LimitAndBalance {
-    int32 limit = 1;
-    int32 balance = 2;
-}
-
 message SaveRequest {
     Transaction transaction = 1;
 }
@@ -22,7 +17,8 @@ message SaveRequest {
 message SaveResponse {
     bool error = 1;
     string message = 2;
-    LimitAndBalance limit_and_balance = 3;
+    int32 limit = 3;
+    int32 balance = 4;
 }
 
 message GetExtractRequest {
@@ -30,8 +26,9 @@ message GetExtractRequest {
 }
 
 message GetExtractResponse {
-    LimitAndBalance limit_and_balance = 1;
-    repeated Transaction transactions = 2;
+    int32 limit = 1;
+    int32 balance = 2;
+    repeated Transaction transactions = 3;
 }
 
 service StoreService {

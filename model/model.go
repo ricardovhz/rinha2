@@ -7,6 +7,7 @@ type Transaction struct {
 	Value       int    `json:"valor" binding:"required"`
 	Type        string `json:"tipo" binding:"required"`
 	Description string `json:"descricao" binding:"required"`
+	Timestamp   int64
 }
 
 func (t *Transaction) GetValue() int {

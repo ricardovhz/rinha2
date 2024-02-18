@@ -1,0 +1,21 @@
+FROM golang:alpine3.18 AS build
+
+RUN apk add --no-cache \
+    # Required for Alpine
+    musl-dev
+
+WORKDIR /workspace
+
+COPY . /workspace/
+
+RUN \
+    go mod tidy && \
+    cd cmd/api && \
+    go install 
+
+# -------------------
+FROM scratch
+COPY --from=build /go/bin/api /opt/app/
+EXPOSE 9999
+ENTRYPOINT ["/opt/app/api"]
+

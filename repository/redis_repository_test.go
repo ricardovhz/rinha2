@@ -26,14 +26,14 @@ func TestSave(t *testing.T) {
 		t.Fail()
 	}
 
-	_, _, err = repo.SaveTransaction(ctx, "2", model.Transaction{
+	_, _, err = repo.SaveTransaction(ctx, "2", &model.Transaction{
 		Type:        "c",
 		Description: "teste",
 		Value:       10,
 	})
 	require.Error(t, err)
 
-	repo.SaveTransaction(ctx, "1", model.Transaction{
+	repo.SaveTransaction(ctx, "1", &model.Transaction{
 		Type:        "c",
 		Description: "teste",
 		Value:       10,
@@ -43,7 +43,7 @@ func TestSave(t *testing.T) {
 	require.Equal(t, l, 100)
 	require.Equal(t, b, 10)
 
-	_, _, err = repo.SaveTransaction(ctx, "1", model.Transaction{
+	_, _, err = repo.SaveTransaction(ctx, "1", &model.Transaction{
 		Type:        "d",
 		Description: "teste",
 		Value:       100,
@@ -55,7 +55,7 @@ func TestSave(t *testing.T) {
 	require.Equal(t, b, -90)
 
 	// limit exceeded
-	_, _, err = repo.SaveTransaction(ctx, "1", model.Transaction{
+	_, _, err = repo.SaveTransaction(ctx, "1", &model.Transaction{
 		Type:        "d",
 		Description: "teste",
 		Value:       500,

@@ -1,0 +1,69 @@
+version: "3.5"
+
+services:
+  api01: &api
+    image: ricardovhz/rinha2/api
+    hostname: api01
+    environment:
+      - DEBUG=false
+      - PORT=3001
+      - STORE_HOST=store:5001
+    ports:
+      - "3001"
+    volumes:
+      - store-db:/var/store/
+    depends_on:
+      - store
+    deploy:
+      resources:
+        limits:
+          cpus: "0.3"
+          memory: "100MB"
+  api02:
+    <<: *api
+    hostname: api02
+    ports:
+      - "3002"
+    environment:
+      - DEBUG=false
+      - PORT=3002
+      - STORE_HOST=store:5001
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api01
+      - api02
+    ports:
+      - "9999:9999"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.4"
+          memory: "100MB"
+  store:
+    image: ricardovhz/rinha2/store
+    hostname: store
+    ports:
+      - "5001:5001"
+    environment:
+      - STORE_CONN_TYPE=tcp
+      - STORE_HOST=:5001
+    volumes:
+      - store-db:/var/store/
+      - store-data:/data/store/
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: "100MB"
+
+networks:
+  default:
+    driver: bridge
+    name: rinha2
+
+volumes:
+  store-db:
+  store-data:

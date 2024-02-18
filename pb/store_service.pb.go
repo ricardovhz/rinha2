@@ -99,61 +99,6 @@ func (x *Transaction) GetValue() int32 {
 	return 0
 }
 
-type LimitAndBalance struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Limit   int32 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
-	Balance int32 `protobuf:"varint,2,opt,name=balance,proto3" json:"balance,omitempty"`
-}
-
-func (x *LimitAndBalance) Reset() {
-	*x = LimitAndBalance{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_store_service_proto_msgTypes[1]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *LimitAndBalance) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*LimitAndBalance) ProtoMessage() {}
-
-func (x *LimitAndBalance) ProtoReflect() protoreflect.Message {
-	mi := &file_store_service_proto_msgTypes[1]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use LimitAndBalance.ProtoReflect.Descriptor instead.
-func (*LimitAndBalance) Descriptor() ([]byte, []int) {
-	return file_store_service_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *LimitAndBalance) GetLimit() int32 {
-	if x != nil {
-		return x.Limit
-	}
-	return 0
-}
-
-func (x *LimitAndBalance) GetBalance() int32 {
-	if x != nil {
-		return x.Balance
-	}
-	return 0
-}
-
 type SaveRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -165,7 +110,7 @@ type SaveRequest struct {
 func (x *SaveRequest) Reset() {
 	*x = SaveRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_store_service_proto_msgTypes[2]
+		mi := &file_store_service_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -178,7 +123,7 @@ func (x *SaveRequest) String() string {
 func (*SaveRequest) ProtoMessage() {}
 
 func (x *SaveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_store_service_proto_msgTypes[2]
+	mi := &file_store_service_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -191,7 +136,7 @@ func (x *SaveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SaveRequest.ProtoReflect.Descriptor instead.
 func (*SaveRequest) Descriptor() ([]byte, []int) {
-	return file_store_service_proto_rawDescGZIP(), []int{2}
+	return file_store_service_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *SaveRequest) GetTransaction() *Transaction {
@@ -206,15 +151,16 @@ type SaveResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Error           bool             `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"`
-	Message         string           `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	LimitAndBalance *LimitAndBalance `protobuf:"bytes,3,opt,name=limit_and_balance,json=limitAndBalance,proto3" json:"limit_and_balance,omitempty"`
+	Error   bool   `protobuf:"varint,1,opt,name=error,proto3" json:"error,omitempty"`
+	Message string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Limit   int32  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	Balance int32  `protobuf:"varint,4,opt,name=balance,proto3" json:"balance,omitempty"`
 }
 
 func (x *SaveResponse) Reset() {
 	*x = SaveResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_store_service_proto_msgTypes[3]
+		mi := &file_store_service_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -227,7 +173,7 @@ func (x *SaveResponse) String() string {
 func (*SaveResponse) ProtoMessage() {}
 
 func (x *SaveResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_store_service_proto_msgTypes[3]
+	mi := &file_store_service_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -240,7 +186,7 @@ func (x *SaveResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SaveResponse.ProtoReflect.Descriptor instead.
 func (*SaveResponse) Descriptor() ([]byte, []int) {
-	return file_store_service_proto_rawDescGZIP(), []int{3}
+	return file_store_service_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *SaveResponse) GetError() bool {
@@ -257,11 +203,18 @@ func (x *SaveResponse) GetMessage() string {
 	return ""
 }
 
-func (x *SaveResponse) GetLimitAndBalance() *LimitAndBalance {
+func (x *SaveResponse) GetLimit() int32 {
 	if x != nil {
-		return x.LimitAndBalance
+		return x.Limit
 	}
-	return nil
+	return 0
+}
+
+func (x *SaveResponse) GetBalance() int32 {
+	if x != nil {
+		return x.Balance
+	}
+	return 0
 }
 
 type GetExtractRequest struct {
@@ -275,7 +228,7 @@ type GetExtractRequest struct {
 func (x *GetExtractRequest) Reset() {
 	*x = GetExtractRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_store_service_proto_msgTypes[4]
+		mi := &file_store_service_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -288,7 +241,7 @@ func (x *GetExtractRequest) String() string {
 func (*GetExtractRequest) ProtoMessage() {}
 
 func (x *GetExtractRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_store_service_proto_msgTypes[4]
+	mi := &file_store_service_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -301,7 +254,7 @@ func (x *GetExtractRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExtractRequest.ProtoReflect.Descriptor instead.
 func (*GetExtractRequest) Descriptor() ([]byte, []int) {
-	return file_store_service_proto_rawDescGZIP(), []int{4}
+	return file_store_service_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetExtractRequest) GetClientId() string {
@@ -316,14 +269,15 @@ type GetExtractResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	LimitAndBalance *LimitAndBalance `protobuf:"bytes,1,opt,name=limit_and_balance,json=limitAndBalance,proto3" json:"limit_and_balance,omitempty"`
-	Transactions    []*Transaction   `protobuf:"bytes,2,rep,name=transactions,proto3" json:"transactions,omitempty"`
+	Limit        int32          `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Balance      int32          `protobuf:"varint,2,opt,name=balance,proto3" json:"balance,omitempty"`
+	Transactions []*Transaction `protobuf:"bytes,3,rep,name=transactions,proto3" json:"transactions,omitempty"`
 }
 
 func (x *GetExtractResponse) Reset() {
 	*x = GetExtractResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_store_service_proto_msgTypes[5]
+		mi := &file_store_service_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -336,7 +290,7 @@ func (x *GetExtractResponse) String() string {
 func (*GetExtractResponse) ProtoMessage() {}
 
 func (x *GetExtractResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_store_service_proto_msgTypes[5]
+	mi := &file_store_service_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -349,14 +303,21 @@ func (x *GetExtractResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExtractResponse.ProtoReflect.Descriptor instead.
 func (*GetExtractResponse) Descriptor() ([]byte, []int) {
-	return file_store_service_proto_rawDescGZIP(), []int{5}
+	return file_store_service_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetExtractResponse) GetLimitAndBalance() *LimitAndBalance {
+func (x *GetExtractResponse) GetLimit() int32 {
 	if x != nil {
-		return x.LimitAndBalance
+		return x.Limit
 	}
-	return nil
+	return 0
+}
+
+func (x *GetExtractResponse) GetBalance() int32 {
+	if x != nil {
+		return x.Balance
+	}
+	return 0
 }
 
 func (x *GetExtractResponse) GetTransactions() []*Transaction {
@@ -379,32 +340,26 @@ var file_store_service_proto_rawDesc = []byte{
 	0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52,
 	0x0b, 0x64, 0x65, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x14, 0x0a, 0x05,
 	0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x76, 0x61, 0x6c,
-	0x75, 0x65, 0x22, 0x41, 0x0a, 0x0f, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x41, 0x6e, 0x64, 0x42, 0x61,
-	0x6c, 0x61, 0x6e, 0x63, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x62,
-	0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x62, 0x61,
-	0x6c, 0x61, 0x6e, 0x63, 0x65, 0x22, 0x3d, 0x0a, 0x0b, 0x53, 0x61, 0x76, 0x65, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x12, 0x2e, 0x0a, 0x0b, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74,
-	0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x54, 0x72, 0x61, 0x6e,
-	0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x0b, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63,
-	0x74, 0x69, 0x6f, 0x6e, 0x22, 0x7c, 0x0a, 0x0c, 0x53, 0x61, 0x76, 0x65, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x08, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65,
-	0x73, 0x73, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73,
-	0x73, 0x61, 0x67, 0x65, 0x12, 0x3c, 0x0a, 0x11, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x5f, 0x61, 0x6e,
-	0x64, 0x5f, 0x62, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x10, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x41, 0x6e, 0x64, 0x42, 0x61, 0x6c, 0x61, 0x6e, 0x63,
-	0x65, 0x52, 0x0f, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x41, 0x6e, 0x64, 0x42, 0x61, 0x6c, 0x61, 0x6e,
-	0x63, 0x65, 0x22, 0x30, 0x0a, 0x11, 0x47, 0x65, 0x74, 0x45, 0x78, 0x74, 0x72, 0x61, 0x63, 0x74,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1b, 0x0a, 0x09, 0x63, 0x6c, 0x69, 0x65, 0x6e,
-	0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x63, 0x6c, 0x69, 0x65,
-	0x6e, 0x74, 0x49, 0x64, 0x22, 0x84, 0x01, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x45, 0x78, 0x74, 0x72,
-	0x61, 0x63, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x3c, 0x0a, 0x11, 0x6c,
-	0x69, 0x6d, 0x69, 0x74, 0x5f, 0x61, 0x6e, 0x64, 0x5f, 0x62, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x10, 0x2e, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x41, 0x6e,
-	0x64, 0x42, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x52, 0x0f, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x41,
-	0x6e, 0x64, 0x42, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x12, 0x30, 0x0a, 0x0c, 0x74, 0x72, 0x61,
-	0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32,
+	0x75, 0x65, 0x22, 0x3d, 0x0a, 0x0b, 0x53, 0x61, 0x76, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x2e, 0x0a, 0x0b, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63,
+	0x74, 0x69, 0x6f, 0x6e, 0x52, 0x0b, 0x74, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f,
+	0x6e, 0x22, 0x6e, 0x0a, 0x0c, 0x53, 0x61, 0x76, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x12, 0x18, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67,
+	0x65, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05,
+	0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x62, 0x61, 0x6c, 0x61, 0x6e,
+	0x63, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x62, 0x61, 0x6c, 0x61, 0x6e, 0x63,
+	0x65, 0x22, 0x30, 0x0a, 0x11, 0x47, 0x65, 0x74, 0x45, 0x78, 0x74, 0x72, 0x61, 0x63, 0x74, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1b, 0x0a, 0x09, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74,
+	0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x63, 0x6c, 0x69, 0x65, 0x6e,
+	0x74, 0x49, 0x64, 0x22, 0x76, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x45, 0x78, 0x74, 0x72, 0x61, 0x63,
+	0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d,
+	0x69, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x12,
+	0x18, 0x0a, 0x07, 0x62, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05,
+	0x52, 0x07, 0x62, 0x61, 0x6c, 0x61, 0x6e, 0x63, 0x65, 0x12, 0x30, 0x0a, 0x0c, 0x74, 0x72, 0x61,
+	0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32,
 	0x0c, 0x2e, 0x54, 0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x0c, 0x74,
 	0x72, 0x61, 0x6e, 0x73, 0x61, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x32, 0x6a, 0x0a, 0x0c, 0x53,
 	0x74, 0x6f, 0x72, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x23, 0x0a, 0x04, 0x53,
@@ -429,29 +384,26 @@ func file_store_service_proto_rawDescGZIP() []byte {
 	return file_store_service_proto_rawDescData
 }
 
-var file_store_service_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_store_service_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_store_service_proto_goTypes = []interface{}{
 	(*Transaction)(nil),        // 0: Transaction
-	(*LimitAndBalance)(nil),    // 1: LimitAndBalance
-	(*SaveRequest)(nil),        // 2: SaveRequest
-	(*SaveResponse)(nil),       // 3: SaveResponse
-	(*GetExtractRequest)(nil),  // 4: GetExtractRequest
-	(*GetExtractResponse)(nil), // 5: GetExtractResponse
+	(*SaveRequest)(nil),        // 1: SaveRequest
+	(*SaveResponse)(nil),       // 2: SaveResponse
+	(*GetExtractRequest)(nil),  // 3: GetExtractRequest
+	(*GetExtractResponse)(nil), // 4: GetExtractResponse
 }
 var file_store_service_proto_depIdxs = []int32{
 	0, // 0: SaveRequest.transaction:type_name -> Transaction
-	1, // 1: SaveResponse.limit_and_balance:type_name -> LimitAndBalance
-	1, // 2: GetExtractResponse.limit_and_balance:type_name -> LimitAndBalance
-	0, // 3: GetExtractResponse.transactions:type_name -> Transaction
-	2, // 4: StoreService.Save:input_type -> SaveRequest
-	4, // 5: StoreService.GetExtract:input_type -> GetExtractRequest
-	3, // 6: StoreService.Save:output_type -> SaveResponse
-	5, // 7: StoreService.GetExtract:output_type -> GetExtractResponse
-	6, // [6:8] is the sub-list for method output_type
-	4, // [4:6] is the sub-list for method input_type
-	4, // [4:4] is the sub-list for extension type_name
-	4, // [4:4] is the sub-list for extension extendee
-	0, // [0:4] is the sub-list for field type_name
+	0, // 1: GetExtractResponse.transactions:type_name -> Transaction
+	1, // 2: StoreService.Save:input_type -> SaveRequest
+	3, // 3: StoreService.GetExtract:input_type -> GetExtractRequest
+	2, // 4: StoreService.Save:output_type -> SaveResponse
+	4, // 5: StoreService.GetExtract:output_type -> GetExtractResponse
+	4, // [4:6] is the sub-list for method output_type
+	2, // [2:4] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_store_service_proto_init() }
@@ -473,18 +425,6 @@ func file_store_service_proto_init() {
 			}
 		}
 		file_store_service_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LimitAndBalance); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_store_service_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SaveRequest); i {
 			case 0:
 				return &v.state
@@ -496,7 +436,7 @@ func file_store_service_proto_init() {
 				return nil
 			}
 		}
-		file_store_service_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_store_service_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SaveResponse); i {
 			case 0:
 				return &v.state
@@ -508,7 +448,7 @@ func file_store_service_proto_init() {
 				return nil
 			}
 		}
-		file_store_service_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_store_service_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetExtractRequest); i {
 			case 0:
 				return &v.state
@@ -520,7 +460,7 @@ func file_store_service_proto_init() {
 				return nil
 			}
 		}
-		file_store_service_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_store_service_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetExtractResponse); i {
 			case 0:
 				return &v.state
@@ -539,7 +479,7 @@ func file_store_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_store_service_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

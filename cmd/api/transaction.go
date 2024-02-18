@@ -50,7 +50,7 @@ func getRepository() repository.Repository {
 	return repo
 }
 
-func saveTransaction(ctx context.Context, id string, t model.Transaction) (int, int, error) {
+func saveTransaction(ctx context.Context, id string, t *model.Transaction) (int, int, error) {
 	repo := getRepository()
 	// limit, balance, err := repo.GetLimitAndBalance(context.Background(), id)
 	// if err != nil {
