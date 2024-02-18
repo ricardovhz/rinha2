@@ -28,6 +28,7 @@ services:
     <<: *api
     hostname: api02
     ports:
+      - "3002:3000"
 
   envoy:
     image: envoyproxy/envoy:v1.29-latest
