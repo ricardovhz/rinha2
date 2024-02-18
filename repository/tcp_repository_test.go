@@ -45,7 +45,6 @@ func Benchmark(b *testing.B) {
 		Value:       10,
 		Description: "devolve",
 	}
-	// b.SetParallelism(100)
 	for i := 0; i < b.N; i++ {
 		lim, bal, err := tRepo.SaveTransaction(context.Background(), "1", tr)
 		if err != nil {

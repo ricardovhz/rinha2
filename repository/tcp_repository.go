@@ -5,6 +5,8 @@ import (
 	"context"
 	"log/slog"
 	"net"
+	"os"
+	"strconv"
 	"sync"
 
 	"github.com/ricardovhz/rinha2/db"
@@ -26,6 +28,22 @@ type tcpRepository struct {
 	pool             *ConnPool
 	requestBytePool  *sync.Pool
 	responseBytePool *sync.Pool
+}
+
+func (t *tcpRepository) validateResponse(resp []byte) error {
+	if resp[0] == 'e' {
+		if resp[1] == 'n' {
+			return ErrClientNotInitialized
+		}
+		if resp[1] == 'l' {
+			return ErrLimitExceeded
+		}
+	}
+	return nil
+}
+
+func (t *tcpRepository) toIntLittleEndian(resp []byte) int {
+	return int(resp[0]) | int(resp[1])<<8 | int(resp[2])<<16 | int(resp[3])<<24
 }
 
 func (t *tcpRepository) GetLimitAndBalance(ctx context.Context, id string) (int, int, error) {
@@ -60,26 +78,17 @@ func (t *tcpRepository) SaveTransaction(ctx context.Context, id string, tr *mode
 		return -1, -1, err
 	}
 
-	if resp[0] == 'e' {
-		if resp[1] == 'n' {
-			return -1, -1, ErrClientNotInitialized
-		}
-		if resp[1] == 'l' {
-			return -1, -1, ErrLimitExceeded
-		}
+	if err = t.validateResponse(resp); err != nil {
+		return -1, -1, err
 	} else if i != 9 {
 		slog.Error("invalid response: " + string(resp))
 		return -1, -1, nil
-		// } else {
-		// 	slog.Warn("estranho", "resp", resp)
 	}
 
-	lim := int(resp[1]) | int(resp[2])<<8 | int(resp[3])<<16 | int(resp[4])<<24
-	bal := int32(int(resp[5]) | int(resp[6])<<8 | int(resp[7])<<16 | int(resp[8])<<24)
+	lim := t.toIntLittleEndian(resp[1:5])
+	bal := int(int32(t.toIntLittleEndian(resp[5:9])))
 
-	// to signed int
-
-	return lim, int(bal), nil
+	return lim, bal, nil
 }
 
 func (t *tcpRepository) GetResume(ctx context.Context, id string) (*model.Resume, error) {
@@ -104,20 +113,15 @@ func (t *tcpRepository) GetResume(ctx context.Context, id string) (*model.Resume
 		return nil, err
 	}
 
-	if resp[0] == 'e' {
-		if resp[1] == 'n' {
-			return nil, ErrClientNotInitialized
-		}
-		if resp[1] == 'l' {
-			return nil, ErrLimitExceeded
-		}
+	if err = t.validateResponse(resp); err != nil {
+		return nil, err
 	} else if i < 9 {
 		slog.Error("invalid response: " + string(resp))
 		return nil, ErrClientNotInitialized
 	}
 
-	lim := int(resp[1]) | int(resp[2])<<8 | int(resp[3])<<16 | int(resp[4])<<24
-	bal := int(int32(int(resp[5]) | int(resp[6])<<8 | int(resp[7])<<16 | int(resp[8])<<24))
+	lim := t.toIntLittleEndian(resp[1:5])
+	bal := int(int32(t.toIntLittleEndian(resp[5:9])))
 
 	trs := make([]*model.Transaction, 0)
 	for j := 9; j < i; j += db.RecordSize {
@@ -134,16 +138,21 @@ func (t *tcpRepository) GetResume(ctx context.Context, id string) (*model.Resume
 		Balance:      bal,
 		Transactions: trs,
 	}, nil
-
 }
 
 func (t *tcpRepository) ShutDown() {
+
+	// TODO fechar as conexões do pool
 }
 
 func NewTcpRepository(addr string) Repository {
+	tcpPoolSize, _ := strconv.Atoi(os.Getenv("TCP_POOL_SIZE"))
+	if tcpPoolSize <= 0 {
+		tcpPoolSize = 10
+	}
 	return &tcpRepository{
 		addr: addr,
-		pool: NewPool(10, func() (net.Conn, error) {
+		pool: NewPool(tcpPoolSize, func() (net.Conn, error) {
 			return net.Dial("tcp", addr)
 		}),
 		requestBytePool: &sync.Pool{

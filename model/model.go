@@ -22,7 +22,7 @@ func (t *Transaction) Validate() error {
 		return fmt.Errorf("invalid type %s", t.Type)
 	}
 	if t.Value < 0 {
-		return fmt.Errorf("invalid valur %d", t.Value)
+		return fmt.Errorf("invalid value %d", t.Value)
 	}
 	if len(t.Description) < 1 || len(t.Description) > 10 {
 		return fmt.Errorf("invalid description %s", t.Description)

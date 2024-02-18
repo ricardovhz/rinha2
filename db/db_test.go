@@ -33,10 +33,7 @@ func TestWriteToRecord(t *testing.T) {
 	r := db.Record{}
 	// buf := bytes.NewBuffer(r[:])
 	// buf.Reset()
-	err := db.WriteRecord("1", &tr, &r)
-	if err != nil {
-		t.Fail()
-	}
+	db.WriteToRecord("1", &tr, &r)
 	log.Printf("%v", r)
 }
 
@@ -66,14 +63,10 @@ func BenchmarkRecord(b *testing.B) {
 		Description: "test",
 	}
 	r := db.Record{}
-	// buf := bytes.NewBuffer(r[:24])
-	// buf.Reset()
-
-	// buff := bufio.NewWriter(buf)
 
 	for i := 0; i < b.N; i++ {
 		// db.ToRecord("1", &tr)
-		db.WriteRecord("1", &tr, &r)
+		db.WriteToRecord("1", &tr, &r)
 		// buf.Reset()
 	}
 }
@@ -95,7 +88,7 @@ func TestDB(t *testing.T) {
 	}
 	defer f.Close()
 
-	db := db.NewDB(db.NewFileWriterFactory())
+	db := db.NewDB(db.NewFileWriterFactoryFromPath("./"))
 
 	tr := make([]*model.Transaction, 100)
 	for i := 0; i < 100; i++ {
@@ -121,7 +114,7 @@ func TestDB(t *testing.T) {
 }
 
 func BenchmarkDB(b *testing.B) {
-	db := db.NewDB(db.NewFileWriterFactory())
+	db := db.NewDB(db.NewFileWriterFactoryFromPath("./"))
 
 	tr := make([]*model.Transaction, 100)
 	for i := 0; i < 100; i++ {
@@ -133,7 +126,6 @@ func BenchmarkDB(b *testing.B) {
 		}
 	}
 
-	// b.StartTimer()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		err := db.Write("1", tr)

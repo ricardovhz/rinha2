@@ -94,21 +94,25 @@ func main() {
 	defer cancelFunc()
 
 	storeRepo := repository.NewTcpRepository(os.Getenv("STORE_HOST"))
-	// if err != nil {
-	// 	panic(err)
-	// }
 	repo = storeRepo
 
 	// warming up
-	repo.GetResume(ctx, "1")
+	var err error
+	for {
+		_, err = repo.GetResume(ctx, "1")
+		if err == nil {
+			slog.Info("Warming up", "client", "1")
+			break
+		}
+	}
+
+	slog.Info("Warming up")
 	repo.GetResume(ctx, "2")
 	repo.GetResume(ctx, "3")
 	repo.GetResume(ctx, "4")
 	repo.GetResume(ctx, "5")
 
 	gin.DisableConsoleColor()
-	// f, _ := os.Create("gin.log")
-	// gin.DefaultWriter = io.MultiWriter(f)
 
 	r := gin.New()
 	r.Use(defaultLogger())
@@ -128,7 +132,12 @@ func main() {
 		)
 		defer p.Put(t)
 		id := gctx.Param("id")
-		err := gctx.ShouldBindJSON(&t)
+
+		// reseting
+		t.Type = ""
+		t.Value = 0
+		t.Description = ""
+		err := gctx.ShouldBindJSON(t)
 		if err != nil {
 			slog.Error("Error binding json", "error", err, "id", id)
 			gctx.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
@@ -154,7 +163,7 @@ func main() {
 			switch err {
 			case repository.ErrLimitExceeded:
 				gctx.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
-			case repository.NotFound:
+			case repository.ErrClientNotInitialized:
 				gctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 			default:
 				gctx.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -162,11 +171,17 @@ func main() {
 			return
 		}
 
-		gctx.JSON(http.StatusOK, gin.H{
-			"limite": limit,
-			"saldo":  balance,
-		})
+		gctx.Data(http.StatusOK, "application/json", []byte(fmt.Sprintf(`{"limite":%d,"saldo":%d}`, limit, balance)))
 	})
+
+	resumePool := sync.Pool{
+		New: func() any {
+			return gin.H{
+				"saldo":              gin.H{},
+				"ultimas_transacoes": []model.Transaction{},
+			}
+		},
+	}
 
 	// GET /clientes/[id]/extrato
 	r.GET("/clientes/:id/extrato", func(gctx *gin.Context) {
@@ -175,29 +190,17 @@ func main() {
 			gctx.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 			return
 		}
-
-		resp := fmt.Sprintf(`{
-	"saldo": {
-		"total": %d,
-		"data_extrato": "%s",
-		"limite": %d
-	},"ultimas_transacoes": [`, resume.Balance, time.Now().Format(time.RFC3339), resume.Limit)
-		for i, t := range resume.Transactions {
+		for _, t := range resume.Transactions {
 			t.Date = time.Unix(t.Timestamp, 0).Format(time.RFC3339Nano)
-			if i > 0 {
-				resp += ","
-			}
-			t := fmt.Sprintf(`{
-		"valor": %d,
-		"tipo": "%s",
-		"descricao": "%s",
-		"realizada_em": "%s"
-	}`, t.Value, t.Type, t.Description, t.Date)
-			resp += t
 		}
-		resp += "]}"
-		gctx.Header("Content-Type", "application/json")
-		gctx.String(http.StatusOK, resp)
+		h := resumePool.Get().(gin.H)
+		defer resumePool.Put(h)
+		hs := h["saldo"].(gin.H)
+		hs["total"] = resume.Balance
+		hs["data_extrato"] = time.Now().Format(time.RFC3339)
+		hs["limite"] = resume.Limit
+		h["ultimas_transacoes"] = resume.Transactions
+		gctx.JSON(200, h)
 	})
 
 	pprof.Register(r)

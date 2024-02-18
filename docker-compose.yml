@@ -6,42 +6,47 @@ services:
     hostname: api01
     environment:
       - DEBUG=false
-      - PORT=3001
+      - PORT=3000
       - STORE_HOST=store:5001
+      - TCP_POOL_SIZE=100
+    ulimits:
+      nofile:
+        soft: 1000000
+        hard: 1000000
+    networks:
+      - rinha2
     ports:
-      - "3001"
-    volumes:
-      - store-db:/var/store/
+      - "3001:3000"
     depends_on:
       - store
     deploy:
       resources:
         limits:
-          cpus: "0.3"
+          cpus: "0.4"
           memory: "100MB"
   api02:
     <<: *api
     hostname: api02
     ports:
-      - "3002"
-    environment:
-      - DEBUG=false
-      - PORT=3002
-      - STORE_HOST=store:5001
-  nginx:
-    image: nginx:latest
+
+  envoy:
+    image: envoyproxy/envoy:v1.29-latest
+    container_name: rinhaproxy
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./envoy.yaml:/etc/envoy/envoy.yaml:ro
     depends_on:
       - api01
       - api02
     ports:
       - "9999:9999"
+    networks:
+      - rinha2
     deploy:
       resources:
         limits:
-          cpus: "0.4"
-          memory: "100MB"
+          cpus: '0.4'
+          memory: '250MB'
+
   store:
     image: ricardovhz/rinha2/store
     hostname: store
@@ -50,20 +55,19 @@ services:
     environment:
       - STORE_CONN_TYPE=tcp
       - STORE_HOST=:5001
+      - PATH_PREFIX=/data/store
+    networks:
+      - rinha2
     volumes:
-      - store-db:/var/store/
       - store-data:/data/store/
     deploy:
       resources:
         limits:
-          cpus: "0.50"
+          cpus: "0.30"
           memory: "100MB"
 
 networks:
-  default:
-    driver: bridge
-    name: rinha2
+  rinha2:
 
 volumes:
-  store-db:
   store-data:

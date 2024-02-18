@@ -14,10 +14,6 @@ import (
 	"github.com/ricardovhz/rinha2/model"
 )
 
-var (
-	NotFound = fmt.Errorf("not found")
-)
-
 type redisRepository struct {
 	redisClient *redis.Client
 }
@@ -42,7 +38,7 @@ func (r *redisRepository) GetLimitAndBalance(ctx context.Context, id string) (in
 		})
 		if err != nil && cmds[1].Err() != nil {
 			slog.Error("Error getting limit", "error", err, "client", id)
-			return -1, -1, NotFound
+			return -1, -1, ErrClientNotInitialized
 		}
 		rl, _ = cmds[0].(*redis.StringCmd).Result()
 		limit, _ = cmds[1].(*redis.StringCmd).Int()
@@ -66,24 +62,6 @@ func (r *redisRepository) SaveTransaction(ctx context.Context, id string, t *mod
 		index int64 = -1
 	)
 	c := r.redisClient
-	// limit, err := c.Get(ctx, "limit:"+id).Int()
-	// if err != nil {
-	// 	slog.Error("Error getting limit", "error", err, "description", t.Description, "client", id)
-	// 	return -1, -1, err
-	// }
-
-	// for {
-	// 	index, err = c.Incr(ctx, "transaction-index:"+id).Result()
-	// 	if err != nil {
-	// 		slog.Error("Error incrementing transaction index", "error", err, "description", t.Description, "client", id)
-	// 		time.Sleep(100 * time.Millisecond)
-	// 	} else {
-	// 		break
-	// 	}
-	// }
-
-	// total, _ = c.Get(ctx, "balance:"+id).Int64()
-
 	p := c.Pipeline()
 
 	p.Get(ctx, "limit:"+id)
@@ -101,39 +79,11 @@ func (r *redisRepository) SaveTransaction(ctx context.Context, id string, t *mod
 	}
 
 	for {
-		// valida transacao
-		// total, _ = c.Get(ctx, "balance:"+id).Int64()
-		// if err != nil {
-		// 	slog.Error("Error incrementing balance", "error", err, "description", t.Description, "client", id)
-		// 	return -1, -1, err
-		// }
-
 		// se valor a debitar for excedido do limite
 		if t.Type == "d" && int(total)+t.GetValue() < limit*-1 {
-
-			// volta o valor, descontando o valor invertido da transacao
-			// for {
-			// 	_, err = c.IncrBy(ctx, "balance-val:"+id, int64(t.GetValue()*-1)).Result()
-			// 	if err == nil {
-			// 		break
-			// 	}
-			// 	slog.Warn("error reverting transaction. trying again", "error", err, "value", t.GetValue(), "description", t.Description, "client", id)
-			// 	time.Sleep(100 * time.Millisecond)
-			// }
 			slog.Info("Limit exceeded", "limit", limit, "balance", total, "description", t.Description, "client", id)
 			return -1, -1, ErrLimitExceeded
 		}
-
-		// _, err = c.ZAdd(ctx, "transactions:"+id, redis.Z{
-		// 	Member: fmt.Sprintf("%s;%s;%s;%d", time.Now().Format(time.RFC3339Nano), t.Type, t.Description, t.Value),
-		// 	Score:  float64(time.Now().Unix()),
-		// }).Result()
-		// if err != nil {
-		// 	slog.Warn("Error saving transaction. trying again", "error", err, "description", t.Description, "client", id)
-		// 	time.Sleep(100 * time.Millisecond)
-		// } else {
-		// 	break
-		// }
 
 		index = (index - 1) % 5
 		for {
@@ -163,12 +113,6 @@ func (r *redisRepository) SaveTransaction(ctx context.Context, id string, t *mod
 		}
 
 		for {
-			// totalVal, _ := c.Get(ctx, "balance:"+id).Int64()
-			// if totalVal != total {
-			// 	slog.Warn("Balance changed. restarting", "old", total, "new", totalVal, "description", t.Description, "client", id)
-			// 	validated = false
-			// 	break
-			// }
 			totalVal, _ := c.Get(ctx, "balance:"+id).Int64()
 			if totalVal != total {
 				slog.Warn("Balance changed. restarting", "old", total, "new", totalVal, "description", t.Description, "client", id)
@@ -216,7 +160,7 @@ func (r *redisRepository) SaveTransaction(ctx context.Context, id string, t *mod
 func (r *redisRepository) GetResume(ctx context.Context, id string) (*model.Resume, error) {
 	limit, balance, err := r.GetLimitAndBalance(ctx, id)
 	if err != nil {
-		return nil, NotFound
+		return nil, ErrClientNotInitialized
 	}
 
 	// values, err := r.redisClient.ZRevRange(ctx, "transactions:"+id, 0, 5).Result()

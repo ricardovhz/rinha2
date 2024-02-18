@@ -5,19 +5,15 @@ import (
 	"net"
 )
 
+// ConnPool is a simple connection pool for TCP connections
+// Copiado de https://medium.com/@rozenslin/quick-approach-of-a-sized-tcp-connection-pool-in-golang-13dad814c53b
+
 type ConnPool struct {
 	// buffered channel for connection pooling
 	c chan net.Conn
 
 	// factory to create new connection
 	f func() (net.Conn, error)
-}
-
-func NewPool(s int, f func() (net.Conn, error)) *ConnPool {
-	return &ConnPool{
-		c: make(chan net.Conn, s),
-		f: f,
-	}
 }
 
 // get one idle conn from pool, if pool empty, create a new one
@@ -43,5 +39,12 @@ func (p *ConnPool) Put(c net.Conn) {
 
 	default:
 		c.Close()
+	}
+}
+
+func NewPool(s int, f func() (net.Conn, error)) *ConnPool {
+	return &ConnPool{
+		c: make(chan net.Conn, s),
+		f: f,
 	}
 }
