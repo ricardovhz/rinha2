@@ -2,7 +2,7 @@ version: "3.5"
 
 services:
   api01: &api
-    image: ricardovhz/rinha2/api
+    image: ricardovhz/rinha2_api
     hostname: api01
     environment:
       - DEBUG=false
@@ -49,7 +49,7 @@ services:
           memory: '250MB'
 
   store:
-    image: ricardovhz/rinha2/store
+    image: ricardovhz/rinha2_store
     hostname: store
     ports:
       - "5001:5001"

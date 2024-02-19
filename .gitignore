@@ -4,3 +4,5 @@ gin.log
 tcp
 1/
 2/
+/cmd/api/api
+/cmd/store/store
