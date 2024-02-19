@@ -1,7 +1,7 @@
 # Submissão para Rinha de Backend, Segunda Edição: 2024/Q1 - Crébito
 
 ## ricardovhz
-Submissão feita com:
+Submissão [rinha-de-backend-2024-q1](https://github.com/zanfranceschi/rinha-de-backend-2024-q1) feita com:
 - `envoy` como load balancer
 - `go` como banco de dados próprio usando TCP (`rinha2_store`)
 - `go` para api com as libs `gin` (`rinha2_api`)
