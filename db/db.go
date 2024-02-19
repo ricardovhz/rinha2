@@ -7,6 +7,7 @@ import (
 
 type DB struct {
 	wf writerFactory
+	r  RegReader
 }
 
 func (db *DB) Write(id string, t []*model.Transaction) error {
@@ -27,6 +28,29 @@ func (db *DB) Write(id string, t []*model.Transaction) error {
 	return nil
 }
 
-func NewDB(wf writerFactory) *DB {
-	return &DB{wf: wf}
+func (db *DB) ReadLast(id string) ([]*model.Transaction, error) {
+	records, err := db.r.ReadLast(id, 5)
+	if err != nil {
+		return nil, err
+	}
+	tr := make([]*model.Transaction, len(records))
+	for i, r := range records {
+		_, tr[i] = ToTransaction(r)
+	}
+	return tr, nil
+}
+
+func (db *DB) ReadBalance(id string) (int32, error) {
+	bal, err := db.r.GetBalance(id)
+	if err != nil {
+		return -1, err
+	}
+	return bal, nil
+}
+
+func NewDB(wf writerFactory, r RegReader) *DB {
+	return &DB{
+		wf: wf,
+		r:  r,
+	}
 }

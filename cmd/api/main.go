@@ -10,8 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gin-contrib/pprof"
-
 	"github.com/gin-gonic/gin"
 	"github.com/ricardovhz/rinha2/model"
 	"github.com/ricardovhz/rinha2/repository"
@@ -151,7 +149,7 @@ func main() {
 			return
 		}
 
-		t.Timestamp = time.Now().Unix()
+		t.Timestamp = time.Now().UnixMilli()
 
 		t1 = time.Now()
 		limit, balance, err := saveTransaction(ctx, id, t)
@@ -202,8 +200,6 @@ func main() {
 		h["ultimas_transacoes"] = resume.Transactions
 		gctx.JSON(200, h)
 	})
-
-	pprof.Register(r)
 
 	port := os.Getenv("PORT")
 	if port == "" {

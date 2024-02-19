@@ -14,7 +14,7 @@ import (
 
 func TestToRecord(t *testing.T) {
 	tr := model.Transaction{
-		Timestamp:   time.Now().UnixMilli(),
+		Timestamp:   time.Now().Unix(),
 		Value:       100,
 		Type:        "c",
 		Description: "test",
@@ -88,7 +88,7 @@ func TestDB(t *testing.T) {
 	}
 	defer f.Close()
 
-	db := db.NewDB(db.NewFileWriterFactoryFromPath("./"))
+	db := db.NewDB(db.NewFileWriterFactoryFromPath("./"), nil)
 
 	tr := make([]*model.Transaction, 100)
 	for i := 0; i < 100; i++ {
@@ -114,7 +114,7 @@ func TestDB(t *testing.T) {
 }
 
 func BenchmarkDB(b *testing.B) {
-	db := db.NewDB(db.NewFileWriterFactoryFromPath("./"))
+	db := db.NewDB(db.NewFileWriterFactoryFromPath("./"), nil)
 
 	tr := make([]*model.Transaction, 100)
 	for i := 0; i < 100; i++ {

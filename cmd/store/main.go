@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"os/signal"
 	"sync/atomic"
-
-	_ "net/http/pprof"
+	"syscall"
 
 	"github.com/ricardovhz/rinha2/db"
 	"github.com/ricardovhz/rinha2/model"
@@ -49,12 +49,14 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, opt))
 	slog.SetDefault(logger)
 
-	dba := db.NewDB(db.NewFileWriterFactory())
+	pathPrefix := os.Getenv("PATH_PREFIX")
+	dba := db.NewDB(db.NewFileWriterFactoryFromPath(pathPrefix), db.NewFileRegReader(pathPrefix))
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 
 	serv := NewStoreService(ctx, dba)
+	defer serv.Close()
 
 	serv.InitializeClient("1", 100000, 0)
 	serv.InitializeClient("2", 80000, 0)
@@ -78,16 +80,34 @@ func main() {
 	}
 	fmt.Printf("Listening on %s\n", os.Getenv("STORE_HOST"))
 
-	for {
+	running := true
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+	conns := make([]net.Conn, 0)
+
+	go func() {
+		<-c
+		slog.Info("shutting down", "conns", len(conns))
+		running = false
+		for _, c2 := range conns {
+			err = c2.Close()
+			if err != nil {
+				slog.Error("error closing conn", "err", err)
+			}
+		}
+		lis.Close()
+	}()
+
+	for running {
 		conn, err := lis.Accept()
 		if err != nil {
 			slog.Error("accept error", "err", err)
 			continue
 		}
 		slog.Info("accepted", "conn", conn.RemoteAddr())
+		conns = append(conns, conn)
 		go func() {
-			defer conn.Close()
-
 			for {
 				b := make([]byte, 25)
 				i, err := conn.Read(b)
@@ -149,5 +169,4 @@ func main() {
 			}
 		}()
 	}
-
 }

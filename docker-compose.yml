@@ -57,6 +57,7 @@ services:
       - STORE_CONN_TYPE=tcp
       - STORE_HOST=:5001
       - PATH_PREFIX=/data/store
+      - DEBUG=true
     networks:
       - rinha2
     volumes:

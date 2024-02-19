@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 )
 
-var pathPrefix = os.Getenv("PATH_PREFIX")
-
 type CloseableRegWriter interface {
 	RegWriter
 	io.Closer
@@ -55,12 +53,6 @@ func (fwf *fileWriterFactory) NewWriter(id, chunkId string, transactionLen int) 
 		return nil, err
 	}
 	return &flushableRegWriter{b: bufio.NewWriterSize(f, transactionLen), w: f}, nil
-}
-
-func NewFileWriterFactory() writerFactory {
-	return &fileWriterFactory{
-		path: pathPrefix,
-	}
 }
 
 func NewFileWriterFactoryFromPath(p string) writerFactory {

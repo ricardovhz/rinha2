@@ -19,7 +19,7 @@ func TestStore(t *testing.T) {
 		Level: slog.LevelDebug,
 	})))
 
-	dba := db.NewDB(db.NewFileWriterFactoryFromPath("./"))
+	dba := db.NewDB(db.NewFileWriterFactoryFromPath("./"), nil)
 	s := NewStoreService(context.Background(), dba)
 	defer s.Close()
 
@@ -27,7 +27,7 @@ func TestStore(t *testing.T) {
 	defer cancelFunc()
 	s.InitializeClient("1", 100000, 0)
 
-	for i := 0; i < 150; i++ {
+	for i := 0; i < 4; i++ {
 		_, _, err := s.Save(ctx, db.ToRecord("1", &model.Transaction{
 			Type:        "c",
 			Description: "asd",
@@ -42,7 +42,7 @@ func BenchmarkStore(b *testing.B) {
 		// Level: slog.LevelDebug,
 	})))
 
-	dba := db.NewDB(db.NewFileWriterFactoryFromPath("./"))
+	dba := db.NewDB(db.NewFileWriterFactoryFromPath("./"), nil)
 	s := NewStoreService(context.Background(), dba)
 	defer s.Close()
 

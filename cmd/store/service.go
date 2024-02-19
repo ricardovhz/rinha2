@@ -22,16 +22,12 @@ type storeService struct {
 	wg   *sync.WaitGroup
 	ctx  context.Context
 	once *sync.Once
-	buf  []*saveContext
+	buf  map[string][]*saveContext
 }
 
-func (s *storeService) flush() {
-	tr := make([]*model.Transaction, len(s.buf))
-	id := ""
-	for i, sc := range s.buf {
-		if i == 0 {
-			id = sc.id
-		}
+func (s *storeService) flush(id string) {
+	tr := make([]*model.Transaction, len(s.buf[id]))
+	for i, sc := range s.buf[id] {
 		tr[i] = sc.transaction
 	}
 	err := s.db.Write(id, tr)
@@ -47,15 +43,19 @@ func (s *storeService) start() {
 	go func(ca chan *saveContext) {
 		defer s.wg.Done()
 		for t := range ca {
-			s.buf = append(s.buf, t)
-			if len(s.buf) == 100 {
-				s.flush()
-				s.buf = make([]*saveContext, 0)
+			id := t.id
+			b := s.buf[t.id]
+			s.buf[id] = append(b, t)
+			if len(s.buf[id]) == 100 {
+				s.flush(id)
+				s.buf[id] = make([]*saveContext, 0)
 			}
 		}
 		slog.Debug("closing")
-		if len(s.buf) > 0 {
-			s.flush()
+		for id := range s.clientInfos {
+			if len(s.buf[id]) > 0 {
+				s.flush(id)
+			}
 		}
 	}(s.c)
 }
@@ -120,7 +120,7 @@ func (s *storeService) Save(ctx context.Context, r db.Record) (int32, int32, err
 		id:          id,
 		transaction: tr,
 	}
-	return lim, bal + int32(tr.Value), nil
+	return lim, bal + int32(val), nil
 }
 
 func (s *storeService) GetExtract(ctx context.Context, id string) (int32, int32, []*model.Transaction, error) {
@@ -149,13 +149,36 @@ func (s *storeService) GetExtract(ctx context.Context, id string) (int32, int32,
 }
 
 func (s *storeService) InitializeClient(id string, limit int32, balance int32) {
+	var (
+		tr  []*model.Transaction
+		bal int32 = balance
+	)
+
 	s.l[id] = &sync.Mutex{}
+	s.buf[id] = make([]*saveContext, 0)
+	t1 := time.Now()
+	rtr, err := s.db.ReadLast(id)
+	if err != nil {
+		tr = make([]*model.Transaction, 5)
+	} else {
+		tr = rtr
+
+		// existe registro de transações
+		// carregando saldo
+		bal, err = s.db.ReadBalance(id)
+
+		if err != nil {
+			slog.Error("error reading balance", "err", err, "id", id)
+		}
+	}
 	s.clientInfos[id] = &clientInfo{
 		limit:            limit,
-		balance:          balance,
+		balance:          bal,
 		counter:          0,
-		lastTransactions: make([]*model.Transaction, 5),
+		lastTransactions: tr,
 	}
+
+	slog.Info("client initialized", "id", id, "limit", limit, "balance", bal, "time", time.Since(t1).Milliseconds())
 }
 
 func NewStoreService(ctx context.Context, db *db.DB) *storeService {
@@ -170,7 +193,7 @@ func NewStoreService(ctx context.Context, db *db.DB) *storeService {
 		wg:   &sync.WaitGroup{},
 		ctx:  ctx,
 		once: &sync.Once{},
-		buf:  make([]*saveContext, 0),
+		buf:  make(map[string][]*saveContext),
 	}
 	s.start()
 	return s
