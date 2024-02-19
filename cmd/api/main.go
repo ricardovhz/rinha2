@@ -189,7 +189,7 @@ func main() {
 			return
 		}
 		for _, t := range resume.Transactions {
-			t.Date = time.Unix(t.Timestamp, 0).Format(time.RFC3339Nano)
+			t.Date = time.UnixMilli(t.Timestamp).Format(time.RFC3339Nano)
 		}
 		h := resumePool.Get().(gin.H)
 		defer resumePool.Put(h)
