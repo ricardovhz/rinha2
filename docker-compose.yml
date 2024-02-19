@@ -48,9 +48,19 @@ services:
           cpus: '0.4'
           memory: '250MB'
 
+  initdb:
+    image: alpine
+    container_name: initdb
+    entrypoint: sh -c "/init.sh"
+    volumes:
+      - store-data:/data/store/
+      - ./init.sh:/init.sh:ro
+
   store:
     image: ricardovhz/rinha2_store
     hostname: store
+    depends_on:
+      - initdb
     ports:
       - "5001:5001"
     environment:
