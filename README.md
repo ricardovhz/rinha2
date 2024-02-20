@@ -7,4 +7,11 @@ Submissão [rinha-de-backend-2024-q1](https://github.com/zanfranceschi/rinha-de-
 - `go` para api com as libs `gin` (`rinha2_api`)
 - [repositório da api](https://github.com/ricardovhz/rinha2)
 
-[@ricardovhz](https://twitter.com/ricardovhz) @ twitter
+## Resultados
+
+![graph](img/graph.png)
+![time](img/time.png)
+![rps](img/rps.png)
+![percent](img/percent.png)
+
+[@ricardovhz](https://twitter.com/ricardovhz) @ twitter | [@ricardovhz](https://github.com/ricardovhz) @ Github
